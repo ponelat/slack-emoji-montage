@@ -1,3 +1,5 @@
+
+
 (ns slack-emoji-montage.core
   (:require [rum.core :as rum]
             [slack-emoji-montage.emoji-data :as data]))
@@ -43,7 +45,7 @@
 (defn map-matrix [f coll]
   (map-indexed (fn [i v] (map-indexed #(f %2 [i %1]) v)) coll))
 
-  (defn blank? [k] (= :blank k))
+(defn blank? [k] (= :blank k))
                       
 (rum/defc emoji-img [k props]
   [:img
@@ -99,13 +101,20 @@
     "Wipe"]])
 
 
- (defn grid-keywords->slack [grid]
+(defn trim-row [coll]
+  (reverse (drop-while blank? (reverse coll))))
+
+(defn trim-rows [grid]
+  (map trim-row (reverse (drop-while (partial every? blank?) (reverse grid)))))
+
+
+(defn grid-keywords->slack [grid]
    (clojure.string/join \newline
      (map
        (fn [row]
          (clojure.string/join
                    (map (fn [k] (str k ":")) row)))
-       grid)))
+       (trim-rows grid))))
 
 
 (rum/defc render-emoji-text < rum/reactive []
